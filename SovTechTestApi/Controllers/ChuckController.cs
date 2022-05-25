@@ -1,45 +1,33 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace SovTechTestApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/chuck")]
     [ApiController]
     public class ChuckController : ControllerBase
     {
-        // GET: api/<ChuckController>
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
+        public const string CHUCK_CATEGORIES_URL = "https://api.chucknorris.io/jokes/categories";
 
-        // GET api/<ChuckController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpGet, Route("/categories")]
+        public async Task<IEnumerable<string>> GetChuckCategoriesAsync()
         {
-            return "value";
-        }
+            List<string> chuckCategories = new List<string>();
+            using (var httpClient = new HttpClient())
+            {
+                using (var response = await httpClient.GetAsync(CHUCK_CATEGORIES_URL))
+                {
+                    string apiResponse = await response.Content.ReadAsStringAsync();
+                    chuckCategories = JsonConvert.DeserializeObject<List<string>>(apiResponse);
+                }
+            }
 
-        // POST api/<ChuckController>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT api/<ChuckController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<ChuckController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            return chuckCategories;
         }
     }
 }
