@@ -28,6 +28,15 @@ namespace SovTechTestApi.Controllers
                     string apiResponse = await response.Content.ReadAsStringAsync();
                     var res = JsonConvert.DeserializeObject<SwapiPeopleResult>(apiResponse);
                     swapiPeople = res.results;
+                    while(res.next != null)
+                    {
+                        using (var responseNext = await httpClient.GetAsync(res.next))
+                        {
+                            apiResponse = await responseNext.Content.ReadAsStringAsync();
+                            res = JsonConvert.DeserializeObject<SwapiPeopleResult>(apiResponse);
+                            swapiPeople = swapiPeople.Concat(res.results).ToList();
+                        }
+                    }
                 }
             }
 
